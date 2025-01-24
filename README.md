@@ -1,2 +1,4 @@
 # DigitalPCR
-code snippets for digital pcr - provided as-is as some parts I just use for parts of other code and tossing them together here in case they help your project
+code snippets for digital pcr - 
+
+Provided 'as-is'. Some parts I use for other apps (internal code) and tossing them together here.  May be helpful to others!  Thanks!
