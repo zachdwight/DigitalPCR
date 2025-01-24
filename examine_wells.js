@@ -1,4 +1,7 @@
 // digital PCR plate
+
+// PART I - Analyze our collection of droplets as a plate
+
 // for this example, we'll say our plate has only 3 rows with 5 wells per row
 
 const wells = [
@@ -29,7 +32,7 @@ function analyzeWellData(wells, threshold) {
   const average = sumValues / totalValues;
   const outliers = findOutliers(allValues); 
 
-  return { average, countAboveThreshold, outliers };
+  return { average, countAboveThreshold, outliers, totalValues };
 }
 
 // find outliers
@@ -49,3 +52,45 @@ const result = analyzeWellData(wells, threshold);
 console.log("Average value:", result.average);
 console.log("Count of values above threshold:", result.countAboveThreshold);
 console.log("Outliers:", result.outliers); 
+
+// PART II - Calculate Copy Number
+// If we continue and assume a well above threshold is our positive droplet, we use poisson to estimate copy number
+// this assumes a poisson distribution of target molecules across droplets
+
+
+function calculateCopyNumber(positiveDroplets, totalDroplets, volumePerDroplet) {
+  /**
+   * Args:
+   *   positiveDroplets: Number of droplets that tested positive for the target.
+   *   totalDroplets: Total number of droplets analyzed.
+   *   volumePerDroplet: Volume of each droplet in liters.
+   * 
+   * Returns:
+   *   Estimated copy number per microliter.
+   */
+
+  // Calculate the fraction of positive droplets
+  const p = positiveDroplets / totalDroplets;
+
+  // Calculate the Poisson parameter (lambda)
+  const lambda = -Math.log(1 - p);
+
+  // Calculate the copy number per droplet
+  const copiesPerDroplet = lambda;
+
+  // Calculate the copy number per microliter
+  const copiesPerMicroliter = copiesPerDroplet / (volumePerDroplet * 1e-6); 
+
+  return copiesPerMicroliter;
+}
+
+// Example usage:
+const positiveDroplets = result.countAboveThreshold; // result from analyze wells
+const totalDroplets = result.totalValues; // result from analyze wells
+const volumePerDroplet = 2e-15; // 2 picoliters
+
+// call the function to calc copy number
+const copyNumber = calculateCopyNumber(positiveDroplets, totalDroplets, volumePerDroplet);
+
+// output the result
+console.log("Estimated copy number per microliter:", copyNumber.toFixed(2)); 
