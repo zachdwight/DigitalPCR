@@ -14,7 +14,7 @@ const threshold = 20.0;
 function analyzeWellData(wells, threshold) {
   let totalValues = 0;
   let sumValues = 0;
-  let countAboveThreshold = 0;
+  let countAboveThreshold = 0; let allValues = [];
 
   for (const well of wells) {
     for (const value of well.values) {
@@ -23,11 +23,23 @@ function analyzeWellData(wells, threshold) {
       if (value > threshold) {
         countAboveThreshold++;
       }
+      allValues.push(value);
     }
   }
-
   const average = sumValues / totalValues;
-  return { average, countAboveThreshold };
+  const outliers = findOutliers(allValues); 
+
+  return { average, countAboveThreshold, outliers };
+}
+
+// find outliers
+function findOutliers(data) {
+  const q1 = data.sort((a, b) => a - b)[Math.floor(data.length * 0.25)];
+  const q3 = data.sort((a, b) => a - b)[Math.ceil(data.length * 0.75)];
+  const iqr = q3 - q1;
+  const lowerBound = q1 - (1.5 * iqr); 
+  const upperBound = q3 + (1.5 * iqr); 
+  return data.filter(x => x < lowerBound || x > upperBound);
 }
 
 // let's call the function
@@ -36,3 +48,4 @@ const result = analyzeWellData(wells, threshold);
 // finally, output the results
 console.log("Average value:", result.average);
 console.log("Count of values above threshold:", result.countAboveThreshold);
+console.log("Outliers:", result.outliers); 
